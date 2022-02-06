@@ -20,7 +20,7 @@ By Marc Izquierdo <marcizhu@gmail.com>
 #include <stddef.h>
 
 /** @brief Alias for ChaCha20 key type */
-typedef uint8_t key_t[32];
+typedef uint8_t cckey_t[32];
 
 /** @brief Alias for ChaCha20 nonce type */
 typedef uint8_t nonce_t[12];
@@ -34,7 +34,7 @@ typedef struct
 extern "C" {
 #endif
 
-void ChaCha20_init(ChaCha20_Ctx* ctx, const key_t key, const nonce_t nonce, uint32_t count);
+void ChaCha20_init(ChaCha20_Ctx* ctx, const cckey_t key, const nonce_t nonce, uint32_t count);
 
 void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen);
 
@@ -180,7 +180,7 @@ static void ChaCha20_block_next(const uint32_t in[16], uint32_t out[16], uint8_t
 		*keystream = (uint8_t*)out;
 }
 
-void ChaCha20_init(ChaCha20_Ctx* ctx, const key_t key, const nonce_t nonce, uint32_t count)
+void ChaCha20_init(ChaCha20_Ctx* ctx, const cckey_t key, const nonce_t nonce, uint32_t count)
 {
 	ctx->state[ 0] = pack4((const uint8_t*)CHACHA20_CONSTANT + 0 * 4);
 	ctx->state[ 1] = pack4((const uint8_t*)CHACHA20_CONSTANT + 1 * 4);
