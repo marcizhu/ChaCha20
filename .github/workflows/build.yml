@@ -1,0 +1,22 @@
+name: Build & Test
+
+on: [push, pull_request]
+
+jobs:
+  job:
+    name: Ubuntu latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build tests & benchmark
+        run: make -j4
+        shell: bash
+
+      - name: Run tests
+        run: ./tests
+        shell: bash
+
+      - name: Run benchmark
+        run: ./benchmark
+        shell: bash
