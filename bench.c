@@ -3,7 +3,7 @@
 #include <sys/time.h>
 
 #define CHACHA20_IMPLEMENTATION
-#include "chacha20.h"
+#include "ChaCha20.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))

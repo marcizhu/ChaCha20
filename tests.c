@@ -4,7 +4,7 @@
 
 #define CHACHA20_IMPLEMENTATION
 #define CHACHA20_NO_UNDEF
-#include "chacha20.h"
+#include "ChaCha20.h"
 
 #define suite(...) if(tst>0&&prev==err)printf("\r \x1b[32m✓\x1b[0m \n");if(printf("   \x1b[1m" __VA_ARGS__ "\x1b[0m"),prev=err,(once=0),1)
 #define test(...)  do{(++tst,err+=!(ok=!!(__VA_ARGS__)));if(!ok){if(!once){printf("\r \x1b[31m✗\x1b[0m \n");once=1;}printf("   \x1b[31m✗\x1b[0m %s:%d → %s\n",__FILE__,__LINE__,#__VA_ARGS__);}}while(0)
