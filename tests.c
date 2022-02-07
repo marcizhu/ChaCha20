@@ -9,7 +9,7 @@
 #define suite(...) if(tst>0&&prev==err)printf("\r \x1b[32m✓\x1b[0m \n");if(printf("   \x1b[1m" __VA_ARGS__ "\x1b[0m"),prev=err,(once=0),1)
 #define test(...)  do{(++tst,err+=!(ok=!!(__VA_ARGS__)));if(!ok){if(!once){printf("\r \x1b[31m✗\x1b[0m \n");once=1;}printf("   \x1b[31m✗\x1b[0m %s:%d → %s\n",__FILE__,__LINE__,#__VA_ARGS__);}}while(0)
 static unsigned tst=0,err=0,ok=1,prev=0,once=0;
-static void summary(void){suite(){}printf("\r  \n\x1b[1m\x1b[33m    %d total", tst);printf("\x1b[1m\x1b[32m   %d passed",tst-err);printf("\x1b[1m\x1b[31m   %d failed\x1b\x1b[0m\n",err);exit(err);}
+static void summary(void){if(tst>0&&prev==err)printf("\r \x1b[32m✓\x1b[0m \n");printf("\r  \n\x1b[1m\x1b[33m    %d total", tst);printf("\x1b[1m\x1b[32m   %d passed",tst-err);printf("\x1b[1m\x1b[31m   %d failed\x1b\x1b[0m\n",err);exit(err);}
 
 int main()
 {
