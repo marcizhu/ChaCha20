@@ -20,11 +20,12 @@ By Marc Izquierdo <marcizhu@gmail.com>
 #include <stddef.h>
 
 /** @brief Alias for ChaCha20 key type */
-typedef uint8_t cckey_t[32];
+typedef uint8_t key256_t[32];
 
 /** @brief Alias for ChaCha20 nonce type */
-typedef uint8_t nonce_t[12];
+typedef uint8_t nonce96_t[12];
 
+/** @brief ChaCha20 context */
 typedef struct
 {
 	uint32_t state[4*4];
@@ -34,8 +35,39 @@ typedef struct
 extern "C" {
 #endif
 
-void ChaCha20_init(ChaCha20_Ctx* ctx, const cckey_t key, const nonce_t nonce, uint32_t count);
+/**
+ * @brief Initialize the ChaCha20 Context
+ *
+ * Initialize the ChaCha20 context with the given 256-bit key, nonce and block
+ * count. The block count can be safely set to 0.
+ *
+ * @param ctx    Pointer to ChaCha20 context
+ * @param key    256-bit key
+ * @param nonce  96-bit nonce
+ * @param count  32-bit block count
+ */
+void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce, uint32_t count);
 
+/**
+ * @brief XOR a given buffer
+ *
+ * Encrypts/decrypts a given buffer, automatically incrementing the block count
+ * if necessary. It is possible to encript/decrypt a document using multiple
+ * calls to this function, but in such case it is required that all but the last
+ * call use a buffer length that is integer multiple of 64 bytes (e.g. 256 or
+ * 65536 bytes).
+ *
+ * In ChaCha20, encryption and decryption are the same opperation since it uses
+ * an XOR between the given buffer and the key stream. Thus, you can use this
+ * function both for encryption and decryption.
+ *
+ * @pre The context must be initialized prior to this call, and the buffer must
+ *      not be @code{c} NULL @endcode.
+ *
+ * @param ctx      Pointer to ChaCha20 context
+ * @param buffer   Pointer to buffer
+ * @param bufflen  Length of the buffer
+ */
 void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen);
 
 #ifdef __cplusplus
@@ -180,7 +212,7 @@ static void ChaCha20_block_next(const uint32_t in[16], uint32_t out[16], uint8_t
 		*keystream = (uint8_t*)out;
 }
 
-void ChaCha20_init(ChaCha20_Ctx* ctx, const cckey_t key, const nonce_t nonce, uint32_t count)
+void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce, uint32_t count)
 {
 	ctx->state[ 0] = pack4((const uint8_t*)CHACHA20_CONSTANT + 0 * 4);
 	ctx->state[ 1] = pack4((const uint8_t*)CHACHA20_CONSTANT + 1 * 4);
