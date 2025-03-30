@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 #define CHACHA20_IMPLEMENTATION
@@ -86,7 +87,51 @@ static void bench_chacha_encrypt_256(void* data)
 		ChaCha20_xor(ctx, scratch, 256);
 }
 
-int main()
+static void bench_chacha_encrypt_1k(void* data)
+{
+	ChaCha20_Ctx* ctx = (ChaCha20_Ctx*)data;
+	uint8_t* scratch = malloc(1024);
+
+	for(int i = 0; i < 64 * 100; i++)
+		ChaCha20_xor(ctx, scratch, 1024);
+
+	free(scratch);
+}
+
+static void bench_chacha_encrypt_8k(void* data)
+{
+	ChaCha20_Ctx* ctx = (ChaCha20_Ctx*)data;
+	uint8_t* scratch = malloc(8 * 1024);
+
+	for(int i = 0; i < 8 * 100; i++)
+		ChaCha20_xor(ctx, scratch, 8 * 1024);
+
+	free(scratch);
+}
+
+static void bench_chacha_encrypt_32k(void* data)
+{
+	ChaCha20_Ctx* ctx = (ChaCha20_Ctx*)data;
+	uint8_t* scratch = malloc(32 * 1024);
+
+	for(int i = 0; i < 2 * 100; i++)
+		ChaCha20_xor(ctx, scratch, 32 * 1024);
+
+	free(scratch);
+}
+
+static void bench_chacha_encrypt_64k(void* data)
+{
+	ChaCha20_Ctx* ctx = (ChaCha20_Ctx*)data;
+	uint8_t* scratch = malloc(64 * 1024);
+
+	for(int i = 0; i < 100; i++)
+		ChaCha20_xor(ctx, scratch, 64 * 1024);
+
+	free(scratch);
+}
+
+int main(void)
 {
 	ChaCha20_Ctx ctx;
 
@@ -97,5 +142,10 @@ int main()
 	run_benchmark("ChaCha20: Encryption (16-byte blocks)",  bench_chacha_encrypt_16,  &ctx, 50, 4000000);
 	run_benchmark("ChaCha20: Encryption (64-byte blocks)",  bench_chacha_encrypt_64,  &ctx, 50, 4000000);
 	run_benchmark("ChaCha20: Encryption (256-byte blocks)", bench_chacha_encrypt_256, &ctx, 50, 4000000);
+
+	run_benchmark("ChaCha20: Encryption (1 KiB blocks)",  bench_chacha_encrypt_1k,  &ctx, 50, 64 * 1024 * 100);
+	run_benchmark("ChaCha20: Encryption (8 KiB blocks)",  bench_chacha_encrypt_8k,  &ctx, 50, 64 * 1024 * 100);
+	run_benchmark("ChaCha20: Encryption (32 KiB blocks)", bench_chacha_encrypt_32k, &ctx, 50, 64 * 1024 * 100);
+	run_benchmark("ChaCha20: Encryption (64 KiB blocks)", bench_chacha_encrypt_64k, &ctx, 50, 64 * 1024 * 100);
 	return 0;
 }
