@@ -2,7 +2,7 @@
 
 Small, fast & straightforward C library to encrypt and/or decrypt blocks of data using Daniel Bernstein's excellent ChaCha20 encryption algorithm as described in RFC 7539.
 
-This library requires no dynamic memory, and only uses 64 bytes per each ChaCha20 context plus an additional 64-byte array used as a temporary buffer when encrypting/decripting (so a total of 128 bytes of memory needed). Because of this, the library is easily embeddable in microcontrollers and can easily be used from other languages such as C++ due to its simple interface (only 2 API calls).
+This library requires no dynamic memory, and only uses 64 bytes per each ChaCha20 context plus an additional 64-byte array used as a temporary buffer when encrypting/decrypting (so a total of 128 bytes of memory needed). Because of this, the library is easily embeddable in microcontrollers and can easily be used from other languages such as C++ due to its simple interface (only 2 API calls).
 
 ## Example usage
 
@@ -52,14 +52,18 @@ Please refer to the file [ChaCha20.h](https://github.com/marcizhu/ChaCha20/blob/
 
 ## Benchmarks
 
-This library has been benchmarked on a MacBook Pro 2018, with an Intel Core i5 @ 2.3GHz (4 cores). The compiler used is Apple clang version 13.0.0, with `-O3` optimization level. Here are the results:
+This library has been benchmarked on a MacBook Pro 2018, with an Intel Core i5 @ 2.3GHz (4 cores). The compiler used is Apple clang version 16.0.0 (clang-1600.0.26.6), with `-O3` optimization level. Here are the results:
 
 | Test Case                    | Minimum | Average | Maximum | Average Speed |
 |:-----------------------------|:-------:|:-------:|:-------:|:-------------:|
-| Initialization               | 5.70 ns | 5.47 ns | 7.64 ns | ~182M calls/s |
-| Encryption (16-byte blocks)  | 7.07 ns | 7.45 ns | 8.07 ns |   ~134 MB/s   |
-| Encryption (64-byte blocks)  | 1.76 ns | 1.79 ns | 2.09 ns |   ~558 MB/s   |
-| Encryption (256-byte blocks) | 1.73 ns | 1.79 ns | 2.47 ns |   ~558 MB/s   |
+| Initialization               | 2.70 ns | 5.47 ns | 7.64 ns | ~182M calls/s |
+| Encryption (16-byte blocks)  | 2.57 ns | 2.76 ns | 3.63 ns |   ~345 MiB/s  |
+| Encryption (64-byte blocks)  | 2.54 ns | 2.61 ns | 2.81 ns |   ~365 MiB/s  |
+| Encryption (256-byte blocks) | 2.56 ns | 2.65 ns | 2.99 ns |   ~359 MiB/s  |
+| Encryption (1 KiB blocks)    | 2.56 ns | 2.68 ns | 2.94 ns |   ~355 MiB/s  |
+| Encryption (8 KiB blocks)    | 2.54 ns | 2.60 ns | 2.94 ns |   ~366 MiB/s  |
+| Encryption (32 KiB blocks)   | 2.55 ns | 2.61 ns | 2.93 ns |   ~365 MiB/s  |
+| Encryption (64 KiB blocks)   | 2.55 ns | 2.61 ns | 2.92 ns |   ~365 MiB/s  |
 
 As always, YMMV. In case you want to benchmark this library yourself, I recommend using the included program [bench.c](https://github.com/marcizhu/ChaCha20/blob/master/bench.c). The reported time for initialization is the time needed for a single call to `ChaCha20_init()`, while the time for the encryption benchmark is the min/avg/max time taken to encrypt a single byte. Thus, the speed is given by the formula: `1/time(s)`.
 
@@ -72,6 +76,6 @@ This library is RFC 7539-compliant, and the code is small to there's not a lot o
 However, please note that this software **does not** offer any warranty. This library is for encrypting your AWS secrets, not for classified war plans or the pictures of the aliens from Roswell.
 
 ## License
-Copyright (c) 2022 Marc Izquierdo  
+Copyright (c) 2022-2025 Marc Izquierdo  
 This library is licensed under the [MIT License](https://choosealicense.com/licenses/mit/). See
 [LICENSE](https://github.com/marcizhu/ChaCha20/blob/master/LICENSE) for more details.
