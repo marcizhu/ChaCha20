@@ -7,9 +7,10 @@ jobs:
     name: Ubuntu latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Build tests & benchmark
+      - name: Build
         run: make -j4
         shell: bash
 
