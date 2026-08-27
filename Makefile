@@ -5,9 +5,10 @@ OPTIONS          := $(BASE_OPTIONS) $(OPTIMIZATION_OPT)
 
 all: tests benchmark examples
 
-examples: ChaCha20.h examples/chunked_cypher.c examples/simple_cypher.c
+examples: ChaCha20.h examples/chunked_cypher.c examples/simple_cypher.c examples/mmap_cypher.c
 	$(COMPILER) $(OPTIONS) -o simple-cypher examples/simple_cypher.c
 	$(COMPILER) $(OPTIONS) -o chunked-cypher examples/chunked_cypher.c
+	$(COMPILER) $(OPTIONS) -o mmap-cypher examples/mmap_cypher.c
 
 tests: ChaCha20.h tests.c
 	$(COMPILER) $(OPTIONS) -o tests tests.c
@@ -18,4 +19,4 @@ benchmark: ChaCha20.h bench.c
 clean:
 	rm -f tests
 	rm -f benchmark
-	rm -f simple-cypher chunked-cypher
+	rm -f simple-cypher chunked-cypher mmap-cypher
