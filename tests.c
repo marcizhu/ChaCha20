@@ -34,6 +34,38 @@ int main(void)
 			test(state[i] == expected[i]);
 	}
 
+	suite("store32le Little-Endian Keystream Emission")
+	{
+		uint32_t words[4*4] = {
+			0xe4e7f110, 0x15593bd1, 0x1fdd0f50, 0xc47120a3,
+			0xc7f4d1c7, 0x0368c033, 0x9aaa2204, 0x4e6cd4c3,
+			0x466482d2, 0x09aa9f07, 0x05d7c214, 0xa2028bd9,
+			0xd19c12b5, 0xb94e16de, 0xe883d0cb, 0x4e3c50a2,
+		};
+
+		uint8_t expected_keystream[] = {
+			0x10, 0xf1, 0xe7, 0xe4, 0xd1, 0x3b, 0x59, 0x15,
+			0x50, 0x0f, 0xdd, 0x1f, 0xa3, 0x20, 0x71, 0xc4,
+			0xc7, 0xd1, 0xf4, 0xc7, 0x33, 0xc0, 0x68, 0x03,
+			0x04, 0x22, 0xaa, 0x9a, 0xc3, 0xd4, 0x6c, 0x4e,
+			0xd2, 0x82, 0x64, 0x46, 0x07, 0x9f, 0xaa, 0x09,
+			0x14, 0xc2, 0xd7, 0x05, 0xd9, 0x8b, 0x02, 0xa2,
+			0xb5, 0x12, 0x9c, 0xd1, 0xde, 0x16, 0x4e, 0xb9,
+			0xcb, 0xd0, 0x83, 0xe8, 0xa2, 0x50, 0x3c, 0x4e,
+		};
+
+		uint8_t keystream[64];
+
+		for(int i = 0; i < 4*4; i++)
+			store32le(keystream + i * 4, words[i]);
+
+		for(int i = 0; i < 64; i++)
+			test(keystream[i] == expected_keystream[i]);
+
+		for(int i = 0; i < 4*4; i++)
+			test(pack4(keystream + i * 4) == words[i]);
+	}
+
 	suite("ChaCha20 Block Function Test Vector #0")
 	{
 		key256_t key = {
@@ -69,11 +101,11 @@ int main(void)
 		};
 
 		uint32_t state[4*4];
-		uint8_t* keystream = NULL;
+		uint8_t keystream[64];
 
 		ChaCha20_Ctx ctx;
 		ChaCha20_init(&ctx, key, nonce, count);
-		ChaCha20_block_next(ctx.state, state, &keystream);
+		ChaCha20_block_next(ctx.state, state, keystream);
 
 		for(int i = 0; i < 4*4; i++)
 			test(state[i] == expected_state[i]);
@@ -117,11 +149,11 @@ int main(void)
 		};
 
 		uint32_t state[4*4];
-		uint8_t* keystream = NULL;
+		uint8_t keystream[64];
 
 		ChaCha20_Ctx ctx;
 		ChaCha20_init(&ctx, key, nonce, count);
-		ChaCha20_block_next(ctx.state, state, &keystream);
+		ChaCha20_block_next(ctx.state, state, keystream);
 
 		for(int i = 0; i < 4*4; i++)
 			test(state[i] == expected_state[i]);
@@ -165,11 +197,11 @@ int main(void)
 		};
 
 		uint32_t state[4*4];
-		uint8_t* keystream = NULL;
+		uint8_t keystream[64];
 
 		ChaCha20_Ctx ctx;
 		ChaCha20_init(&ctx, key, nonce, count);
-		ChaCha20_block_next(ctx.state, state, &keystream);
+		ChaCha20_block_next(ctx.state, state, keystream);
 
 		for(int i = 0; i < 4*4; i++)
 			test(state[i] == expected_state[i]);
@@ -213,11 +245,11 @@ int main(void)
 		};
 
 		uint32_t state[4*4];
-		uint8_t* keystream = NULL;
+		uint8_t keystream[64];
 
 		ChaCha20_Ctx ctx;
 		ChaCha20_init(&ctx, key, nonce, count);
-		ChaCha20_block_next(ctx.state, state, &keystream);
+		ChaCha20_block_next(ctx.state, state, keystream);
 
 		for(int i = 0; i < 4*4; i++)
 			test(state[i] == expected_state[i]);
@@ -261,11 +293,11 @@ int main(void)
 		};
 
 		uint32_t state[4*4];
-		uint8_t* keystream = NULL;
+		uint8_t keystream[64];
 
 		ChaCha20_Ctx ctx;
 		ChaCha20_init(&ctx, key, nonce, count);
-		ChaCha20_block_next(ctx.state, state, &keystream);
+		ChaCha20_block_next(ctx.state, state, keystream);
 
 		for(int i = 0; i < 4*4; i++)
 			test(state[i] == expected_state[i]);
@@ -309,11 +341,11 @@ int main(void)
 		};
 
 		uint32_t state[4*4];
-		uint8_t* keystream = NULL;
+		uint8_t keystream[64];
 
 		ChaCha20_Ctx ctx;
 		ChaCha20_init(&ctx, key, nonce, count);
-		ChaCha20_block_next(ctx.state, state, &keystream);
+		ChaCha20_block_next(ctx.state, state, keystream);
 
 		for(int i = 0; i < 4*4; i++)
 			test(state[i] == expected_state[i]);

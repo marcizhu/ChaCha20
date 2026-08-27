@@ -48,7 +48,7 @@ typedef uint8_t nonce96_t[12];
 typedef struct
 {
 	uint32_t state[4*4];
-	uint32_t keystream[4*4];
+	uint8_t  keystream[4*4*4];
 	uint32_t idx;
 } ChaCha20_Ctx;
 
@@ -156,7 +156,15 @@ static uint32_t pack4(const uint8_t* a)
 	return res;
 }
 
-static void ChaCha20_block_next(const uint32_t in[16], uint32_t out[16], uint8_t** keystream)
+static void store32le(uint8_t* p, uint32_t v)
+{
+	p[0] = (uint8_t)(v >> 0 * 8);
+	p[1] = (uint8_t)(v >> 1 * 8);
+	p[2] = (uint8_t)(v >> 2 * 8);
+	p[3] = (uint8_t)(v >> 3 * 8);
+}
+
+static void ChaCha20_block_next(const uint32_t in[16], uint32_t out[16], uint8_t* keystream)
 {
 	for(int i = 0; i < 4*4; i++)
 		out[i] = in[i];
@@ -265,7 +273,8 @@ static void ChaCha20_block_next(const uint32_t in[16], uint32_t out[16], uint8_t
 		out[i] += in[i];
 
 	if(keystream != NULL)
-		*keystream = (uint8_t*)out;
+		for(int i = 0; i < 4*4; i++)
+			store32le(keystream + i * 4, out[i]);
 }
 
 void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce, uint32_t count)
@@ -292,13 +301,13 @@ void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce,
 
 void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen)
 {
-	uint8_t* keystream = (uint8_t*)ctx->keystream;
+	uint32_t words[4*4];
 
 	for(size_t i = 0; i < bufflen; i++)
 	{
 		if(ctx->idx % 64 == 0)
 		{
-			ChaCha20_block_next(ctx->state, ctx->keystream, &keystream);
+			ChaCha20_block_next(ctx->state, words, ctx->keystream);
 			ctx->state[12]++;
 			ctx->idx = 0;
 
@@ -311,7 +320,7 @@ void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen)
 			}
 		}
 
-		buffer[i] = buffer[i] ^ keystream[ctx->idx++];
+		buffer[i] = buffer[i] ^ ctx->keystream[ctx->idx++];
 	}
 }
 
