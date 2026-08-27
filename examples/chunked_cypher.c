@@ -35,11 +35,12 @@ int main(void)
 
 	for(;;)
 	{
-		int n = fread(buff, sizeof(uint8_t), CHUNK_SIZE, stdin);
-		if (n <= 0 && feof(stdin))
+		size_t n = fread(buff, sizeof(uint8_t), CHUNK_SIZE, stdin);
+		if (n == 0)
 			break;
 
 		ChaCha20_xor(&ctx, buff, n);
-		fwrite(buff, 1, n, stdout);
+		if (fwrite(buff, 1, n, stdout) != n)
+			return EXIT_FAILURE;
 	}
 }

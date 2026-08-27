@@ -66,6 +66,11 @@ extern "C" {
  * @param key    256-bit key
  * @param nonce  96-bit nonce
  * @param count  32-bit block count
+ *
+ * @warning Never reuse the same (key, nonce) pair, even with a different block
+ *          count: doing so reuses the keystream and allows trivial recovery of
+ *          both plaintexts (the XOR of the two ciphertexts). Nonces must be
+ *          unique per key.
  */
 void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce, uint32_t count);
 
@@ -73,10 +78,9 @@ void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce,
  * @brief XOR a given buffer
  *
  * Encrypts/decrypts a given buffer, automatically incrementing the block count
- * if necessary. It is possible to encript/decrypt a document using multiple
- * calls to this function, but in such case it is required that all but the last
- * call use a buffer length that is integer multiple of 64 bytes (e.g. 256 or
- * 65536 bytes).
+ * if necessary. It is possible to encrypt/decrypt a document using multiple
+ * calls to this function: the internal position in the keystream is preserved
+ * across calls, so each call can use a buffer of any length.
  *
  * In ChaCha20, encryption and decryption are the same opperation since it uses
  * an XOR between the given buffer and the key stream. Thus, you can use this
@@ -88,8 +92,31 @@ void ChaCha20_init(ChaCha20_Ctx* ctx, const key256_t key, const nonce96_t nonce,
  * @param ctx      Pointer to ChaCha20 context
  * @param buffer   Pointer to buffer
  * @param bufflen  Length of the buffer
+ *
+ * @warning Never reuse the same (key, nonce) pair, even with a different block
+ *          count: doing so reuses the keystream and allows trivial recovery of
+ *          both plaintexts (the XOR of the two ciphertexts). Nonces must be
+ *          unique per key.
+ *
+ * @warning Raw ChaCha20 is a stream cipher and provides confidentiality only:
+ *          it offers NO integrity/authentication, ciphertexts are fully
+ *          malleable (bit-flipping in the ciphertext flips predictable bits in
+ *          the plaintext), and this function must not be relied upon for
+ *          integrity. If authenticated encryption is needed, use
+ *          ChaCha20-Poly1305 (RFC 8439) or another AEAD.
  */
 void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen);
+
+/**
+ * @brief Wipe a ChaCha20 context
+ *
+ * Zeroes all context contents (including the key stored in
+ * @code{c} state[4..11] @endcode) in a way that is not optimized away;
+ * callers should also wipe their own copies of key/nonce.
+ *
+ * @param ctx Pointer to ChaCha20 context (NULL is ignored)
+ */
+void ChaCha20_clear(ChaCha20_Ctx* ctx);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -100,7 +127,11 @@ void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen);
  *                               IMPLEMENTATION                               *
  ******************************************************************************/
 
-#include <assert.h>
+#include <stdlib.h>
+
+#ifdef _MSC_VER
+	#include <string.h>
+#endif
 
 #define CHACHA20_CONSTANT       "expand 32-byte k"
 #define CHACHA20_ROTL(x, n)     (((x) << (n)) | ((x) >> (32 - (n))))
@@ -274,12 +305,29 @@ void ChaCha20_xor(ChaCha20_Ctx* ctx, uint8_t* buffer, size_t bufflen)
 			if(ctx->state[12] == 0)
 			{
 				ctx->state[13]++;
-				assert(ctx->state[13] != 0);
+
+				if(ctx->state[13] == 0)
+					abort(); // counter+nonce fully wrapped: would reuse keystream
 			}
 		}
 
 		buffer[i] = buffer[i] ^ keystream[ctx->idx++];
 	}
+}
+
+void ChaCha20_clear(ChaCha20_Ctx* ctx)
+{
+	if(ctx == NULL)
+		return;
+
+#ifdef _MSC_VER
+	memset_s(ctx, sizeof(ChaCha20_Ctx), 0, sizeof(ChaCha20_Ctx));
+#else
+	// volatile writes so the compiler cannot optimize away the wipe
+	volatile uint8_t* p = (volatile uint8_t*)ctx;
+	for(size_t i = 0; i < sizeof(ChaCha20_Ctx); i++)
+		p[i] = 0;
+#endif
 }
 
 #ifdef __cplusplus

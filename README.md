@@ -2,11 +2,11 @@
 
 Small, fast & straightforward C library to encrypt and/or decrypt blocks of data using Daniel Bernstein's excellent ChaCha20 encryption algorithm as described in RFC 7539.
 
-This library requires no dynamic memory, and only uses 64 bytes per each ChaCha20 context plus an additional 64-byte array used as a temporary buffer when encrypting/decrypting (so a total of 128 bytes of memory needed). Because of this, the library is easily embeddable in microcontrollers and can easily be used from other languages such as C++ due to its simple interface (only 2 API calls).
+This library requires no dynamic memory, and only uses 64 bytes per each ChaCha20 context plus an additional 64-byte array used as a temporary buffer when encrypting/decrypting (so a total of 128 bytes of memory needed). Because of this, the library is easily embeddable in microcontrollers and can easily be used from other languages such as C++ due to its simple interface (only 3 API calls).
 
 ## Example usage
 
-In order to encrypt (or decrypt) a block of data, you will need a 256-bit key as an 8-byte array, a 96-bit nonce and the data itself. First, a ChaCha20 context must be initialized by calling `ChaCha20_init()` with the ChaCha20 context, key, the nonce and the block count. Then, the block of data can be encrypted or decrypted by calling `ChaCha20_xor()` with the context and the buffer of data. The data will be encrypted/decrypted in place.
+In order to encrypt (or decrypt) a block of data, you will need a 256-bit key as a 32-byte array, a 96-bit nonce and the data itself. First, a ChaCha20 context must be initialized by calling `ChaCha20_init()` with the ChaCha20 context, key, the nonce and the block count. Then, the block of data can be encrypted or decrypted by calling `ChaCha20_xor()` with the context and the buffer of data. The data will be encrypted/decrypted in place.
 
 The following snippet shows a simple example of how to encrypt (or decrypt) a block of data:
 
@@ -68,14 +68,21 @@ This library has been benchmarked on a MacBook Pro 2018, with an Intel Core i5 @
 As always, YMMV. In case you want to benchmark this library yourself, I recommend using the included program [bench.c](https://github.com/marcizhu/ChaCha20/blob/master/bench.c). The reported time for initialization is the time needed for a single call to `ChaCha20_init()`, while the time for the encryption benchmark is the min/avg/max time taken to encrypt a single byte. Thus, the speed is given by the formula: `1/time(s)`.
 
 ## Compiling
-The included Makefile will compile the library into a static library as well as compile the tests and benchmark. You can also use the provided `CMakeLists.txt` in order to compile this library into a static library or integrate this project with yours.
+The included Makefile will compile the library into a static library as well as compile the tests and benchmark.
 
 ## Security
+
+> [!CAUTION]
+> Never reuse the same (key, nonce) pair, ever. Each message under a given key must use a unique nonce, even if the block count or the data is different: reusing a nonce reuses the keystream, and the XOR of two ciphertexts encrypted with the same (key, nonce) pair trivially reveals both plaintexts.
+
+> [!WARNING]
+> Raw ChaCha20 is a stream cipher and provides confidentiality only. It offers **no** integrity or authentication, and ciphertexts are fully malleable: an attacker can flip bits in the ciphertext and know exactly which bits of the plaintext change as a result. Do not rely on this library for integrity. If authenticated encryption is required, use ChaCha20-Poly1305 (RFC 8439) or another AEAD.
+
 This library is RFC 7539-compliant, and the code is small to there's not a lot of bug surface area. It uses 256-bit keys and 96-bit nonce as well as a well-regarded, modern and widely used algorithm. Additionally, all available test vectors are executed on CI/CD after each commit, so it should be pretty robust.
 
 However, please note that this software **does not** offer any warranty. This library is for encrypting your AWS secrets, not for classified war plans or the pictures of the aliens from Roswell.
 
 ## License
-Copyright (c) 2022-2025 Marc Izquierdo  
+Copyright (c) 2022-2026 Marc Izquierdo  
 This library is licensed under the [MIT License](https://choosealicense.com/licenses/mit/). See
 [LICENSE](https://github.com/marcizhu/ChaCha20/blob/master/LICENSE) for more details.
